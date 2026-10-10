@@ -1,4 +1,4 @@
-# King
+# Remotion 作業フォルダ
 
 [Remotion](https://www.remotion.dev/) で動画をプログラムから自動生成するサンプルです。
 動画の中身は React コンポーネントで書き、フレーム番号に応じてアニメーションさせます。
