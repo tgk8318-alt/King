@@ -1,12 +1,16 @@
 import {
   AbsoluteFill,
   Easing,
+  Html5Audio,
   Interactive,
   interpolate,
+  Sequence,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { Logo } from "./HelloWorld/Logo";
+import { Sparkles } from "./HelloWorld/Sparkles";
 import { Title } from "./HelloWorld/Title";
 
 export type HelloWorldProps = {
@@ -23,6 +27,18 @@ export const HelloWorld: React.FC<HelloWorldProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: "white" }}>
+      {/* BGM: 最初の1秒でフェードイン、最後の1秒でフェードアウト */}
+      <Html5Audio
+        src={staticFile("bgm.wav")}
+        volume={(f) =>
+          interpolate(
+            f,
+            [0, fps, durationInFrames - fps, durationInFrames],
+            [0, 0.6, 0.6, 0],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+          )
+        }
+      />
       <Interactive.Div
         name="Content fade"
         premountFor={fps}
@@ -58,12 +74,12 @@ export const HelloWorld: React.FC<HelloWorldProps> = ({
           titleColor={titleColor}
         />
         <Interactive.Div
-          name="Editing hint"
+          name="Subtitle"
           from={75}
           premountFor={fps}
           style={{
             fontFamily: "SF Pro Text, Helvetica, Arial, sans-serif",
-            fontSize: 40,
+            fontSize: 56,
             textAlign: "center",
             position: "absolute",
             bottom: 140,
@@ -74,8 +90,12 @@ export const HelloWorld: React.FC<HelloWorldProps> = ({
             }),
           }}
         >
-          Edit <code style={{ color: "#86A8E7" }}>src/Root.tsx</code> and save to reload.
+          今日が一番若い日
         </Interactive.Div>
+        {/* サブタイトルが出るのと同時に、画面全体に黄色いキラキラ */}
+        <Sequence from={75} layout="none">
+          <Sparkles />
+        </Sequence>
       </Interactive.Div>
     </AbsoluteFill>
   );

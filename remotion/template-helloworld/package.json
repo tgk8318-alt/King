@@ -6,7 +6,8 @@
     "dev": "remotion studio",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc"
+    "lint": "eslint src && tsc",
+    "bgm": "node scripts/make-bgm.mjs"
   },
   "repository": {},
   "license": "UNLICENSED",
