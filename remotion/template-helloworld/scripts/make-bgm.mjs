@@ -1,6 +1,6 @@
 // 落ち着いたBGM（public/bgm.wav）を音源ファイルなしで合成するスクリプト。
 // 実行: node scripts/make-bgm.mjs
-// やわらかいパッド（和音）＋オルゴール風の分散和音＋軽いエコー。
+// 明るい長調のやわらかいパッド＋オルゴール風の分散和音とメロディ＋軽いエコー。
 import { writeFileSync, mkdirSync } from "node:fs";
 
 const SAMPLE_RATE = 44100;
@@ -11,12 +11,12 @@ const right = new Float32Array(N);
 
 const freq = (midi) => 440 * 2 ** ((midi - 69) / 12);
 
-// コード進行: Fmaj7 → Em7 → Dm7 → Cmaj7（各2秒）
+// コード進行（ハ長調）: C → G → F → C（各2秒）。明るく穏やかな王道進行
 const chords = [
-  [53, 57, 60, 64],
-  [52, 55, 59, 62],
-  [50, 53, 57, 60],
-  [48, 52, 55, 59],
+  [60, 64, 67, 74],
+  [59, 62, 67, 74],
+  [60, 65, 69, 72],
+  [60, 64, 67, 72],
 ];
 const CHORD_LEN = 2;
 
@@ -34,31 +34,49 @@ chords.forEach((notes, c) => {
       const env = Math.min(1, t / 0.8) * Math.min(1, (len - t) / 0.8);
       const vibrato = 1 + 0.002 * Math.sin(2 * Math.PI * 4.5 * t);
       const ph = 2 * Math.PI * f * vibrato * t;
-      const v = (Math.sin(ph) + 0.25 * Math.sin(2 * ph)) * env * 0.05;
+      const v =
+        (Math.sin(ph) + 0.35 * Math.sin(2 * ph) + 0.1 * Math.sin(3 * ph)) *
+        env *
+        0.04;
       left[idx] += v * (1 - pan);
       right[idx] += v * pan;
     }
   }
 });
 
-// オルゴール風の分散和音（1オクターブ上、0.5秒ごと）
+// オルゴール風の音を1つ鳴らす
+const bell = (midi, start, gain, pan) => {
+  const f = freq(midi);
+  for (let s = 0; s < 1.6 * SAMPLE_RATE; s++) {
+    const idx = Math.floor(start * SAMPLE_RATE) + s;
+    if (idx >= N) break;
+    const t = s / SAMPLE_RATE;
+    const env = Math.min(1, t / 0.005) * Math.exp(-t * 3.5);
+    const ph = 2 * Math.PI * f * t;
+    const v =
+      (Math.sin(ph) + 0.3 * Math.sin(2 * ph) + 0.1 * Math.sin(4 * ph)) *
+      env *
+      gain;
+    left[idx] += v * (1 - pan);
+    right[idx] += v * pan;
+  }
+};
+
+// 分散和音（1オクターブ上、0.25秒刻みで上がって下がる）
 chords.forEach((notes, c) => {
-  const pattern = [0, 2, 1, 3];
-  pattern.forEach((p, k) => {
-    const start = c * CHORD_LEN + k * 0.5;
-    const f = freq(notes[p] + 12);
-    for (let s = 0; s < 1.6 * SAMPLE_RATE; s++) {
-      const idx = Math.floor(start * SAMPLE_RATE) + s;
-      if (idx >= N) break;
-      const t = s / SAMPLE_RATE;
-      const env = Math.min(1, t / 0.01) * Math.exp(-t * 3);
-      const ph = 2 * Math.PI * f * t;
-      const v = (Math.sin(ph) + 0.15 * Math.sin(3 * ph)) * env * 0.06;
-      left[idx] += v * 0.6;
-      right[idx] += v * 0.4;
-    }
+  [0, 1, 2, 3, 2, 1, 2, 3].forEach((p, k) => {
+    bell(notes[p] + 12, c * CHORD_LEN + k * 0.25, 0.035, 0.35);
   });
 });
+
+// ゆったりしたメロディ（[音, 開始秒]）
+const melody = [
+  [79, 0], [76, 0.75], [77, 1.5],
+  [79, 2], [74, 2.75], [76, 3.5],
+  [77, 4], [81, 4.75], [79, 5.5],
+  [76, 6], [72, 6.75],
+];
+for (const [m, t] of melody) bell(m + 12, t, 0.05, 0.6);
 
 // 左右でずらしたエコーで広がりを出す
 const addEcho = (buf, other, delaySec, gain) => {
