@@ -29,7 +29,7 @@ export const RemotionRoot: React.FC = () => {
           width={1920}
           height={1080}
           defaultProps={{
-            titleText: "Welcome to Remotion",
+            titleText: "ようこそリモーションへ",
             titleColor: "#000000",
           }}
         />
@@ -46,7 +46,7 @@ export const RemotionRoot: React.FC = () => {
         // You can override these props for each render:
         // https://www.remotion.dev/docs/parametrized-rendering
         defaultProps={{
-          titleText: "Welcome to Remotion",
+          titleText: "ようこそリモーションへ",
           titleColor: "#000000",
         }}
       />

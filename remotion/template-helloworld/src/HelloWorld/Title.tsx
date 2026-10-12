@@ -50,7 +50,7 @@ const TitleInner: React.FC<TitleProps> = ({ titleText, titleColor, style }) => {
 };
 
 const titleSchema = {
-  titleText: { type: "text-content", default: "Welcome to Remotion", description: "Title" },
+  titleText: { type: "text-content", default: "ようこそリモーションへ", description: "Title" },
   titleColor: { type: "color", default: "#000000", description: "Title color" },
 } as const satisfies InteractivitySchema;
 
